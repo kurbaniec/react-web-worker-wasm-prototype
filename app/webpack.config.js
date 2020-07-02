@@ -14,11 +14,16 @@ module.exports = {
 
     // adding .ts and .tsx to resolve.extensions will help babel look for .ts and .tsx files to transpile
     resolve: {
-        extensions: ['.ts', '.tsx', '.js']
+        extensions: ['.ts', '.tsx', '.js', '.wasm']
     },
 
     module: {
         rules: [
+            // web worker
+            {
+                test: /\.worker\.ts$/,
+                use: { loader: 'worker-loader' },
+            },
             // we use babel-loader to load our jsx and tsx files
             {
                 test: /\.(ts|js)x?$/,
@@ -33,7 +38,7 @@ module.exports = {
             {
                 test: /\.css$/,
                 use: ['style-loader', 'css-loader']
-            }
+            },
         ]
     },
     plugins: [

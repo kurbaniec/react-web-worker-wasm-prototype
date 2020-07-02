@@ -3,10 +3,16 @@ import * as ReactDOM from "react-dom";
 
 import { Hello } from "./components/Hello";
 
-let test: number = 1;
+import Worker from 'worker-loader!./worker/worker';
 
-test++;
-alert(test);
+// web worker
+const worker = new Worker();
+
+worker.postMessage({ a: 1 });
+worker.onmessage = (event) => {};
+
+worker.addEventListener('message', (event) => {});
+
 
 ReactDOM.render(
     <Hello compiler="TypeScript" framework="React" />,
