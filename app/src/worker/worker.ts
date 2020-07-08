@@ -8,6 +8,7 @@ ctx.postMessage({ foo: 'foo' });
 // Respond to message from parent thread
 ctx.addEventListener('message', (event) => console.log(event));
 
-import("../../../bin/pkg/bin_bg").then(wasm => {
-    wasm.logging();
+import("../../../bin/pkg/bin").then(wasm => {
+    //wasm.logging();
+    wasm.test();
 });

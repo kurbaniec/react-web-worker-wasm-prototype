@@ -1,0 +1,3 @@
+[submodule "ordo"]
+	path = ordo
+	url = https://github.com/kurbaniec/ordo.git

@@ -67,6 +67,7 @@ module.exports = {
 
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const WorkboxPlugin = require('workbox-webpack-plugin');
 module.exports = (args, options) => {
 
     /**
@@ -94,11 +95,6 @@ module.exports = (args, options) => {
 
         module: {
             rules: [
-                // web worker
-                {
-                    test: /\.worker\.ts$/,
-                    use: {loader: 'worker-loader'},
-                },
                 // we use babel-loader to load our jsx and tsx files
                 {
                     test: /\.(ts|js)x?$/,
@@ -128,7 +124,10 @@ module.exports = (args, options) => {
         plugins: [
             new HtmlWebpackPlugin({
                 template: './src/index.html'
-            })
+            }),
+            /**new WorkboxPlugin.GenerateSW({
+                swDest: 'appSW.js'
+            }),*/
         ],
 
         devtool: "source-map",
@@ -175,6 +174,11 @@ module.exports = (args, options) => {
                 },
             ]
         },
+        /**plugins: [
+            new WorkboxPlugin.GenerateSW({
+                swDest: 'workerSW.js'
+            }),
+        ],*/
         devtool: "source-map",
     };
 
