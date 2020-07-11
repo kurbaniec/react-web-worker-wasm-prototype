@@ -6,6 +6,7 @@ use ordo::action::Action;
 use ordo_derive::{action, state, Action};
 use serde::Deserialize;
 use serde::Serialize;
+
 use serde_json::Value;
 use wasm_bindgen::__rt::std::rc::Rc;
 use wasm_bindgen::prelude::*;
@@ -109,6 +110,13 @@ pub fn test() {
     );
     node2.dispatch(MyAction::INCREMENT(String::from("INC")));
     node2.dispatch(MyAction2::INCREMENT(String::from("INC2")));
+
+    let moved_value = 2;
+    node2.subscribe(move |state: &Value| {
+        log(&format!("Subscription Invocation | State: {:?}", &state));
+        log(&format!("Some moved value: {}", &moved_value));
+    });
+
     node2.dispatch(MyAction2::INCREMENT(String::from("INC2")));
 
     let val = node2.get_state();

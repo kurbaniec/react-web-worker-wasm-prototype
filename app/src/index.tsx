@@ -9,7 +9,13 @@ const worker = new Worker("worker.js");
 worker.postMessage({ a: 1 });
 worker.onmessage = (event) => {};
 
-worker.addEventListener('message', (event) => {});
+/**
+worker.addEventListener('message', (e) => {
+    console.log("Received from worker: " + e.data);
+});*/
+
+import {Node} from "ordo";
+const test = new Node(worker);
 
 
 if ('serviceWorker' in navigator) {
