@@ -1,15 +1,19 @@
-export const increment = () => {
+export const increment = (payload) => {
    return {
-      type: 'INCREMENT',
-      ident: 'MyAction'
-   };
+      ident: 'MyAction',
+      action: {
+         type: 'INCREMENT',
+         payload: payload
+      }
+   }
 };
 
-export const decrement = (payload) => {
+export const decrement = () => {
    return {
-      type: 'DECREMENT',
       ident: 'MyAction',
-      payload: payload
-   };
+      action: {
+         type: 'DECREMENT',
+      }
+   }
 };
 
