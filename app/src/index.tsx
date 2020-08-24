@@ -2,6 +2,8 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 // @ts-ignore
 import * as MyAction from "../../bin/ordo-bindings/MyAction.js";
+// @ts-ignore
+import * as MyAction2 from "../../bin/ordo-bindings/MyAction2.js";
 
 import { Hello } from "./components/Hello";
 
@@ -12,14 +14,30 @@ const worker = new Worker("worker.js");
   console.log("Received from worker: " + e.data);
 });*/
 
-import("../../ordo/ordo-adapter/pkg/ordo_adapter").then(async (ordo) => {
+import("../../ordo/ordo_adapter/pkg/ordo_adapter").then(async (ordo) => {
   const store = new ordo.Node(worker);
+
+  const func = () => {
+    const state = store.getState();
+    console.log("This func will be unsubscribed ", state);
+  };
+  store.subscribe(func);
+  store.subscribe(() => {
+    const state = store.getState();
+    console.log("State-Change! ", state);
+  });
+
   await store.ready();
 
   const state = store.getState();
   console.log("Ordo-Store: ", state);
+
   store.dispatch(MyAction.increment("Dispatch!"));
+  store.unsubscribe(func);
   store.dispatch(MyAction.decrement());
+
+  store.dispatch(MyAction2.decrement());
+  store.dispatch(MyAction2.decrement());
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {

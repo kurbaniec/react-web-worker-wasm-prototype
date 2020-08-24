@@ -11,6 +11,7 @@ use serde::Deserialize;
 use serde::Serialize;
 
 use ordo::prime::PrimeNode;
+use ordo::reducer::Reducer;
 use serde_json::Value;
 use wasm_bindgen::__rt::core::any::Any;
 use wasm_bindgen::__rt::core::cell::RefCell;
@@ -53,7 +54,8 @@ pub enum MyAction {
     DECREMENT,
 }
 
-fn baum(state: &Testo, action: MyAction, param: &Option<Rc<u64>>) -> Testo {
+/**
+fn baum(state: Testo, action: MyAction) -> Testo {
     log(&format!("STATE: {}", &state.counter));
     match action {
         MyAction::INCREMENT(some) => {
@@ -62,13 +64,13 @@ fn baum(state: &Testo, action: MyAction, param: &Option<Rc<u64>>) -> Testo {
         MyAction::DECREMENT => log("DECREMENT"),
     }
 
-    let param = param.as_ref().unwrap();
-    log(&format!("PARAM: {}", &param));
+    //let param = param.as_ref().unwrap();
+    //log(&format!("PARAM: {}", &param));
     //Testo { ..*state }
     Testo {
         counter: state.counter + 1,
     }
-}
+}*/
 
 #[action]
 pub enum MyAction2 {
@@ -76,7 +78,8 @@ pub enum MyAction2 {
     DECREMENT,
 }
 
-fn baum2(state: &Testo, action: MyAction2, param: &Option<Rc<u64>>) -> Testo {
+/**
+fn baum2(state: Testo, action: MyAction2) -> Testo {
     log(&format!("STATE2: {}", &state.counter));
     match action {
         MyAction2::INCREMENT(some) => {
@@ -85,12 +88,12 @@ fn baum2(state: &Testo, action: MyAction2, param: &Option<Rc<u64>>) -> Testo {
         MyAction2::DECREMENT => log("DECREMENT2"),
     }
 
-    let param = param.as_ref().unwrap();
-    log(&format!("PARAM:2 {}", &param));
+    //let param = param.as_ref().unwrap();
+    //log(&format!("PARAM:2 {}", &param));
     Testo {
         counter: state.counter + 1,
     }
-}
+}*/
 
 #[wasm_bindgen]
 pub struct MyApp {
@@ -109,6 +112,44 @@ impl MyApp {
 
         let testo2 = Testo { counter: 10 };
         let testo3 = Testo { counter: 100 };
+
+        let param2 = param.clone();
+        let baum = Reducer::new(Box::new(move |state: Testo, action: MyAction| {
+            log(&format!("STATE: {}", &state.counter));
+            match action {
+                MyAction::INCREMENT(some) => {
+                    log(&format!("INCREMENT: {}", &some));
+                }
+                MyAction::DECREMENT => log("DECREMENT"),
+            }
+
+            log(&format!("PARAM: {}", &param2));
+            //Testo { ..*state }
+            Testo {
+                counter: state.counter + 1,
+            }
+        }));
+
+        // Glue code is needed for async block
+        // https://www.reddit.com/r/rust/comments/drtxbt/question_how_to_put_async_fn_into_a_map/f6lb4wt?utm_source=share&utm_medium=web2x&context=3
+        let param3 = param.clone();
+        let baum2 = Reducer::new_async(Box::new(move |state: Testo, action: MyAction2| {
+            let param4 = param3.clone();
+            Box::new(async move {
+                log(&format!("STATE2: {}", &state.counter));
+                match action {
+                    MyAction2::INCREMENT(some) => {
+                        log(&format!("INCREMENT2: {}", &some));
+                    }
+                    MyAction2::DECREMENT => log("DECREMENT2"),
+                }
+                log(&format!("PARAM:2 {}", &param4));
+                Testo {
+                    counter: state.counter - 1,
+                }
+            })
+        }));
+
         let node = ordo::create_combined_store!(
             babel,
             (
@@ -116,6 +157,7 @@ impl MyApp {
                 ordo::reducer!("test3", testo3, baum2, Some(param.clone()))
             )
         );
+        /*
         node.dispatch(MyAction::INCREMENT(String::from("INC")));
         node.dispatch(MyAction2::INCREMENT(String::from("INC2")));
 
@@ -126,7 +168,7 @@ impl MyApp {
         });
 
         node.dispatch(MyAction2::INCREMENT(String::from("INC2")));
-
+        */
         let val = node.get_state();
         log(&format!("VAL: {:?}", &val));
 
@@ -150,14 +192,24 @@ pub fn test() {
         parse_SomeTest
     );
 
-    //let wut = serde_json::from_value(val).unwrap();
-    //let val: Box<dyn Any> = Box::new(wut);
-    //let kek: MyAction2 = __funcMyAction2(String::from("INCREMENT"), Some(Box::new(String::from("kek"))));
-    //log(&format!("VAL: {:?}", &kek));
-    //let val = check(val);
-    //let kek: MyAction2 = __parseMyAction2(String::from("INCREMENT"), Some(val));
-
     let param = Rc::new(10);
+
+    let baum = Reducer::new(Box::new(move |state: Testo, action: MyAction| {
+        log(&format!("STATE: {}", &state.counter));
+        match action {
+            MyAction::INCREMENT(some) => {
+                log(&format!("INCREMENT: {}", &some));
+            }
+            MyAction::DECREMENT => log("DECREMENT"),
+        }
+
+        //let param = param.as_ref().unwrap();
+        //log(&format!("PARAM: {}", &param));
+        //Testo { ..*state }
+        Testo {
+            counter: state.counter + 1,
+        }
+    }));
 
     let testo = Testo { counter: 0 };
     let node = ordo::create_store(testo, baum, Some(param.clone()), babel);
@@ -181,11 +233,44 @@ pub fn test() {
 
     let testo2 = Testo { counter: 10 };
     let testo3 = Testo { counter: 100 };
+
+    let baum2 = Reducer::new(Box::new(move |state: Testo, action: MyAction| {
+        log(&format!("STATE: {}", &state.counter));
+        match action {
+            MyAction::INCREMENT(some) => {
+                log(&format!("INCREMENT: {}", &some));
+            }
+            MyAction::DECREMENT => log("DECREMENT"),
+        }
+
+        //let param = param.as_ref().unwrap();
+        //log(&format!("PARAM: {}", &param));
+        //Testo { ..*state }
+        Testo {
+            counter: state.counter + 1,
+        }
+    }));
+    let baum3 = Reducer::new(Box::new(move |state: Testo, action: MyAction2| {
+        log(&format!("STATE2: {}", &state.counter));
+        match action {
+            MyAction2::INCREMENT(some) => {
+                log(&format!("INCREMENT2: {}", &some));
+            }
+            MyAction2::DECREMENT => log("DECREMENT2"),
+        }
+
+        //let param = param.as_ref().unwrap();
+        //log(&format!("PARAM:2 {}", &param));
+        Testo {
+            counter: state.counter + 1,
+        }
+    }));
+
     let node2 = ordo::create_combined_store!(
         babel,
         (
-            ordo::reducer!("test2", testo2, baum, Some(param.clone())),
-            ordo::reducer!("test3", testo3, baum2, Some(param.clone()))
+            ordo::reducer!("test2", testo2, baum2, Some(param.clone())),
+            ordo::reducer!("test3", testo3, baum3, Some(param.clone()))
         )
     );
     node2.dispatch(MyAction::INCREMENT(String::from("INC")));
